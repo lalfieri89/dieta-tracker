@@ -366,10 +366,17 @@ function defaultState(){
   const today=todayISO();
   return { profile:{heightCm:174, birthdate:"1989-05-25"}, activeDiet:"seed", diets:[ seedDiet(today) ] };
 }
+// il piano della dieta "seed" è definito nel codice (DIET): lo rigeneriamo sempre
+// così le modifiche alle ricette si propagano anche ai salvataggi locali/cloud esistenti
+function refreshSeedPlan(s){
+  const seed = s && Array.isArray(s.diets) && s.diets.find(d=>d.id==="seed");
+  if(seed) seed.plan = JSON.parse(JSON.stringify(DIET));
+  return s;
+}
 // porta i vecchi salvataggi {config,entries} nel nuovo formato multi-dieta
 function migrate(s){
   if(!s || typeof s!=="object") return null;
-  if(Array.isArray(s.diets) && s.profile) return s;           // già nuovo
+  if(Array.isArray(s.diets) && s.profile) return refreshSeedPlan(s);   // già nuovo
   if(s.config && Array.isArray(s.entries)){                    // vecchio
     const c=s.config;
     return {
